@@ -5,6 +5,7 @@
 # e.g. ${WORKSPACE}/scripts/rpmbuilder.sh ${WORKSPACE}/soe/rpms/ 
 #
 
+
 # Load common parameter variables
 . $(dirname "${0}")/common.sh
 
@@ -21,7 +22,7 @@ function build_srpm {
 	    # download any sources if necessary
 	    spectool -g -C $(pwd) ${SPECFILE}
             rm -f ${SRPMS_DIR}/${rpmname}-*.src.rpm
-            /usr/bin/mock --buildsrpm --spec ${SPECFILE} --sources $(pwd) --resultdir ${SRPMS_DIR}
+            /usr/bin/mock --root ${ROOT} --buildsrpm --spec ${SPECFILE} --sources $(pwd) --resultdir ${SRPMS_DIR}
             RETVAL=$?
             if [[ ${RETVAL} != 0 ]]
             then
@@ -29,7 +30,7 @@ function build_srpm {
                 exit ${SRPMBUILD_ERR}
             fi
             srpmname=${SRPMS_DIR}/${rpmname}-*.src.rpm
-            /usr/bin/mock --rebuild ${srpmname} -D "%debug_package %{nil}" --resultdir ${RPMS_DIR}
+            /usr/bin/mock --root ${ROOT} --rebuild ${srpmname} -D "%debug_package %{nil}" --resultdir ${RPMS_DIR}
             RETVAL=$?
             if [[ ${RETVAL} != 0 ]]
             then
@@ -56,6 +57,8 @@ then
     exit ${NOARGS}
 fi
 workdir=$1
+
+ROOT=${2:-rhel-7-x86_64}
 
 if [[ -z ${WORKSPACE} ]] || [[ ! -w ${WORKSPACE} ]]
 then
