@@ -2,7 +2,7 @@
 
 # Push RPMs to satellite via a yum repo
 #
-# e.g. ${WORKSPACE}/scripts/rpmpush.sh ${WORKSPACE}/soe/artefacts/
+# e.g. ${WORKSPACE}/scripts/rpmpush.sh ${WORKSPACE}/buildhost-packages
 #
 
 # Load common parameter variables
@@ -15,19 +15,9 @@ then
 fi
 workdir=$1
 
-if [[ -z ${PUSH_USER} ]] || [[ -z ${SATELLITE} ]]
-then
-    err "PUSH_USER or SATELLITE not set or not found"
-    exit ${WORKSPACE_ERR}
-fi
-
 # refresh the upstream yum repo
 createrepo ${YUM_REPO}
     
-# use hammer on the satellite to push the RPMs into the repo
-# the ID of the ACME Test repository is 16
-ssh -l ${PUSH_USER} -i /var/lib/jenkins/.ssh/id_rsa ${SATELLITE} \
-    "hammer repository synchronize --id ${REPO_ID}"
-    
-
+# use hammer to push the RPMs into the repo
+/usr/bin/hammer repository synchronize --organization "${ORG}" --product "${PRODUCT}" --name "${YUM_REPO_NAME}" 2>/dev/null
 
